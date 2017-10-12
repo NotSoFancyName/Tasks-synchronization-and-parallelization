@@ -28,11 +28,14 @@ public class Controller {
     private AtomicBoolean cancelation ;
     private AtomicBoolean promtIsActive;
 
-    Controller(int portNumber) throws IOException {
+    Controller(int portNumber, int portNumber2) throws IOException {
 
         // add KeyListener for ESC termination
         globalListenerManager keyLisMan = new globalListenerManager();
         GlobalScreen.addNativeKeyListener(new EscapeListener());
+
+        promtIsActive = new AtomicBoolean(false);
+        cancelation  =  new AtomicBoolean(false);
         
         //Read X
         Scanner reader = new Scanner(System.in);  // Reading from System.in
@@ -49,7 +52,7 @@ public class Controller {
         for(String function : functions) {
             String[] command = {"java", "Main", function};
             ProcessBuilder probuilder = new ProcessBuilder( command );
-            probuilder.directory(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile().substring(1)));
+            probuilder.directory(new File(System.getProperty("user.dir") +  "\\target\\classes"));
             processes.add(probuilder.start());
         }
 
@@ -60,28 +63,31 @@ public class Controller {
         ServerSocket serverSocket = new ServerSocket();
         serverSocket.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), portNumber));
 
+        ServerSocket serverSocket2 = new ServerSocket();
+        serverSocket2.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), portNumber2));
+
         try (
                 Socket socket = serverSocket.accept();
-                Socket socket2 = serverSocket.accept();
+                Socket socket2 = serverSocket2.accept();
         ) {
 
             // new thread for a client;
             Future<Server.Status> future1 = executor.submit(new Server(socket,Integer.parseInt(x)));
             Future<Server.Status> future2 = executor.submit(new Server(socket2,Integer.parseInt(x)));
 
-            boolean PopingUserPromt = true;
-
             //Promt loop
-            promtIsActive = new AtomicBoolean(false);
-            cancelation  =  new AtomicBoolean(false);
-            long time = System.nanoTime() + 3000000000L;
+            boolean PopingUserPromt = true;
+            final long WAIT_TIME = 3000000000L;
+            long time = System.nanoTime() + WAIT_TIME;
 
             while(!cancelation.get() && ( (!future1.isDone()) || !future2.isDone())){
 
+                Thread.sleep(1);  // added to reduce CPU usage (cutting down is significant: from 25% to 1%)
                 if(future1.isDone() && !future1.get().getResult()) break;
                 if(future2.isDone() && !future2.get().getResult()) break;
                 if(!PopingUserPromt) continue;
                 if(cancelation.get()) break;
+
                 if(System.nanoTime() < time) continue;
 
                 promtIsActive.set(true);
@@ -90,8 +96,8 @@ public class Controller {
 
                 switch (UserCommand) {
                     case "a":
-                        System.out.println("Continue calculation");
-                        time = System.nanoTime() + 3000000000L;
+                        //System.out.println("Continue calculation");
+                        time = System.nanoTime() + WAIT_TIME;
                         promtIsActive.set(false);
                         continue;
                     case "b":
@@ -112,14 +118,17 @@ public class Controller {
             }
 
             //Verifying status
-
                 String ResultStatus = "";
                 if (future1.isDone() && future2.isDone() && future2.get().getResult() && future1.get().getResult()) {
                     ResultStatus += "The Final result is true";
                 } else if ((future1.isDone() && !future1.get().getResult())||(future2.isDone() && !future2.get().getResult())) {
                     ResultStatus += "The Final result is false";
-                } else {
-                    ResultStatus += "Cannot define final result because one of the functions was not complete";
+                } else if ( !future1.isDone() && !future2.isDone()){
+                    ResultStatus += "Cannot define final result because both F and G were not complete";
+                } else if(!future2.isDone()){
+                    ResultStatus += "Cannot define final result because G was not complete";
+                } else if(!future1.isDone()){
+                    ResultStatus += "Cannot define final result because F was not complete";
                 }
 
                 System.out.println(ResultStatus);
@@ -130,7 +139,6 @@ public class Controller {
         }
 
         // quiting
-        System.out.println("\nDestroying processes");
         for(Process process : processes) {
             if(process.isAlive())
                 process.destroy();

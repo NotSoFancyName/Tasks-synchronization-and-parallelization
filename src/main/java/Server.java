@@ -37,6 +37,7 @@ public class Server implements Callable<Server.Status> {
             LOGGER.log( Level.FINE, "Sending argument to the client" );
 
             String input = brinp.readLine();
+
             if (input.equals("true")) {
                 status.setResult(true);
             } else if (input.equals("false")) {
@@ -48,6 +49,7 @@ public class Server implements Callable<Server.Status> {
             LOGGER.log( Level.FINE, "The execution time is:" + time);
 
             status.setRunningTime(time);
+
             return status;
 
 

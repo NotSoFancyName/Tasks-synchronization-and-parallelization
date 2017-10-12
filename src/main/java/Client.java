@@ -13,8 +13,11 @@ import static java.lang.Thread.sleep;
 
 class Client {
 
-    private int portNumber = 4444;
+    private int portNumber;
     Client(String typeOfFunction){
+
+        if( typeOfFunction.equals("F")) portNumber = 4444; else if( typeOfFunction.equals("G")) portNumber = 1234;
+
         try (
                 Socket echoSocket = new Socket(InetAddress.getLocalHost().getHostAddress(), portNumber);
                 PrintWriter out =
@@ -37,6 +40,7 @@ class Client {
                 result = someFunction1(X);
             }
 
+
             if(result){
                 out.println("true");
             }
@@ -56,7 +60,7 @@ class Client {
 
         switch(x){
             case 1: sleep(1000); return true;
-            case 2: sleep(10000); return true;
+            case 2: sleep(4000); return true;
             case 3: sleep(1000); return false;
             case 4: sleep(Long.MAX_VALUE);
             case 5: sleep(2000); return true;
@@ -69,10 +73,10 @@ class Client {
     private static boolean someFunction1(int x)throws InterruptedException{
 
         switch(x){
-            case 1: sleep(10000); return true;
+            case 1: sleep(4000); return true;
             case 2: sleep(1000); return true;
             case 3: sleep(Long.MAX_VALUE);
-            case 4: sleep(8000); return false;
+            case 4: sleep(6000); return false;
             case 5: sleep(Long.MAX_VALUE);
             case 6: sleep(2000); return true;
         }
