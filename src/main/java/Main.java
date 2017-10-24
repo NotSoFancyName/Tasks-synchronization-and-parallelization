@@ -18,16 +18,16 @@ import static java.lang.Thread.sleep;
 public class Main {
 
     private static int portNumber = 4444;
-    private static int portNumber2 = 1234;
+    //private static int portNumber2 = 1234;
     public static void main(String[] args) throws IOException{
 
         // Clients' processes
         if (args.length > 0) {
-            new Client(args[0]); // args[0] - type of function
+            new Client();
         }
         // Server process
         else {
-            new Controller(portNumber,portNumber2); // server
+            new Controller(portNumber); // server
         }
     }
 }

@@ -13,10 +13,10 @@ import static java.lang.Thread.sleep;
 
 class Client {
 
-    private int portNumber;
-    Client(String typeOfFunction){
+    private int portNumber = 4444;
+    Client(){
 
-        if( typeOfFunction.equals("F")) portNumber = 4444; else if( typeOfFunction.equals("G")) portNumber = 1234;
+        //if( typeOfFunction.equals("F")) portNumber = 4444; else if( typeOfFunction.equals("G")) portNumber = 1234;
 
         try (
                 Socket echoSocket = new Socket(InetAddress.getLocalHost().getHostAddress(), portNumber);
@@ -31,6 +31,7 @@ class Client {
         ){
             Boolean result = null;
 
+            String typeOfFunction = in.readLine();
             int X = in.read();
 
             if(typeOfFunction.equals("F")){

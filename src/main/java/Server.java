@@ -12,12 +12,14 @@ public class Server implements Callable<Server.Status> {
 
     Logger LOGGER = Logger.getLogger( Server.class.getName() );
     private Socket clientSocket;
-    int x;
+    private int x;
+    private String typeOfFunction;
 
-    Server(Socket clientSocket, int x){
+    Server(Socket clientSocket, int x, String typeOfFunction){
         this.clientSocket = clientSocket;
         LOGGER.log( Level.FINE, "Initialization of the server" );
         this.x = x;
+        this.typeOfFunction = typeOfFunction;
     }
 
     @Override
@@ -33,7 +35,10 @@ public class Server implements Callable<Server.Status> {
             out = new DataOutputStream(clientSocket.getOutputStream());
 
             long time = System.nanoTime();
+
+            out.writeBytes(typeOfFunction + "\n");
             out.write(x);
+
             LOGGER.log( Level.FINE, "Sending argument to the client" );
 
             String input = brinp.readLine();

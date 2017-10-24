@@ -28,7 +28,7 @@ public class Controller {
     private AtomicBoolean cancelation ;
     private AtomicBoolean promtIsActive;
 
-    Controller(int portNumber, int portNumber2) throws IOException {
+    Controller(int portNumber) throws IOException {
 
         // add KeyListener for ESC termination
         globalListenerManager keyLisMan = new globalListenerManager();
@@ -63,17 +63,17 @@ public class Controller {
         ServerSocket serverSocket = new ServerSocket();
         serverSocket.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), portNumber));
 
-        ServerSocket serverSocket2 = new ServerSocket();
-        serverSocket2.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), portNumber2));
+        //ServerSocket serverSocket2 = new ServerSocket();
+        //serverSocket2.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), portNumber2));
 
         try (
                 Socket socket = serverSocket.accept();
-                Socket socket2 = serverSocket2.accept();
+                Socket socket2 = serverSocket.accept();
         ) {
 
             // new thread for a client;
-            Future<Server.Status> future1 = executor.submit(new Server(socket,Integer.parseInt(x)));
-            Future<Server.Status> future2 = executor.submit(new Server(socket2,Integer.parseInt(x)));
+            Future<Server.Status> future1 = executor.submit(new Server(socket,Integer.parseInt(x),"F"));
+            Future<Server.Status> future2 = executor.submit(new Server(socket2,Integer.parseInt(x),"G"));
 
             //Promt loop
             boolean PopingUserPromt = true;
